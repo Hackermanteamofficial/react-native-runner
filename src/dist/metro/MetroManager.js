@@ -36,6 +36,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MetroManager = void 0;
 const http = __importStar(require("http"));
 const vscode = __importStar(require("vscode"));
+const PortHelper_1 = require("./PortHelper");
 const Logger_1 = require("../utils/Logger");
 class MetroManager {
     static instance;
@@ -72,6 +73,19 @@ class MetroManager {
             this.logger.info(`Metro bundler is already running on port ${port}.`);
             return true;
         }
+        // Check if port is locked by a zombie process not responding to /status
+        const pid = await PortHelper_1.PortHelper.getPidOnPort(port);
+        if (pid) {
+            this.logger.warn(`Port ${port} is occupied by PID ${pid} but not responding to Metro status.`);
+            const choice = await vscode.window.showWarningMessage(`Port ${port} is occupied by an external process (PID ${pid}). Terminate it to start Metro?`, 'Kill & Start Metro', 'Cancel');
+            if (choice === 'Kill & Start Metro') {
+                await PortHelper_1.PortHelper.killProcess(pid);
+                await new Promise(r => setTimeout(r, 1000));
+            }
+            else {
+                return false;
+            }
+        }
         this.logger.info(`Starting Metro bundler on port ${port}...`);
         this.startMetroTerminal(project, port);
         // Wait up to 30 seconds for Metro /status to become available
@@ -87,23 +101,33 @@ class MetroManager {
         this.logger.warn(`Metro did not report running status within ${Math.round(timeoutMs / 1000)}s.`);
         return false;
     }
-    startMetroTerminal(project, port = 8081) {
+    startMetroTerminal(project, port = 8081, resetCache = false) {
         // Find existing terminal if open
         const existingTerminal = vscode.window.terminals.find(t => t.name === 'Metro Bundler');
-        if (existingTerminal) {
+        if (existingTerminal && !resetCache) {
             this.terminal = existingTerminal;
             this.terminal.show(true);
             return;
+        }
+        if (existingTerminal) {
+            existingTerminal.dispose();
         }
         this.terminal = vscode.window.createTerminal({
             name: 'Metro Bundler',
             cwd: project.rootPath
         });
-        const command = project.isExpo
+        const resetFlag = project.isExpo ? '-c' : '--reset-cache';
+        const baseCommand = project.isExpo
             ? `npx expo start --port ${port}`
             : `npx react-native start --port ${port}`;
+        const command = resetCache ? `${baseCommand} ${resetFlag}` : baseCommand;
+        this.logger.info(`Launching Metro terminal: ${command}`);
         this.terminal.sendText(command);
         this.terminal.show(true);
+    }
+    restartWithCleanCache(project, port = 8081) {
+        this.logger.info('Restarting Metro bundler with clean cache...');
+        this.startMetroTerminal(project, port, true);
     }
     async triggerReload(port = 8081) {
         return new Promise((resolve) => {

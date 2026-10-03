@@ -119,7 +119,7 @@ class WorkspaceResolver {
         }));
         const chosen = await vscode.window.showQuickPick(items, {
             placeHolder: 'Multiple React Native projects detected. Select the active project:',
-            title: 'RN Device Runner: Select Workspace Project'
+            title: 'React Native Runner: Select Workspace Project'
         });
         if (chosen) {
             this.selectedFolder = chosen.folder;

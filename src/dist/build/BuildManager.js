@@ -43,6 +43,7 @@ const ContentHasher_1 = require("./ContentHasher");
 const DiskSpaceChecker_1 = require("../utils/DiskSpaceChecker");
 const ProcessRunner_1 = require("../utils/ProcessRunner");
 const ConfigurationManager_1 = require("../config/ConfigurationManager");
+const GradleErrorDiagnoser_1 = require("./diagnostics/GradleErrorDiagnoser");
 const Logger_1 = require("../utils/Logger");
 class BuildManager {
     static instance;
@@ -126,7 +127,21 @@ class BuildManager {
                 }
             });
             if (result.exitCode !== 0) {
-                throw new Error(`Gradle build failed with exit code ${result.exitCode}. See output log for details.`);
+                const combinedOutput = `${result.stdout}\n${result.stderr}`;
+                const diagnosis = GradleErrorDiagnoser_1.GradleErrorDiagnoser.diagnose(combinedOutput);
+                this.logger.error(`\n[DIAGNOSTIC REPORT] ${diagnosis.title}\n${diagnosis.details}`);
+                vscode.window.showErrorMessage(`Build Failed: ${diagnosis.title}`, diagnosis.actionLabel || 'Show Output').then(selection => {
+                    if (selection === diagnosis.actionLabel && diagnosis.actionDocUrl) {
+                        vscode.env.openExternal(vscode.Uri.parse(diagnosis.actionDocUrl));
+                    }
+                    else if (selection === 'Open Run Diagnostics') {
+                        vscode.commands.executeCommand('rn-diagnose');
+                    }
+                    else {
+                        this.logger.show(true);
+                    }
+                });
+                throw new Error(`${diagnosis.title}: ${diagnosis.details}`);
             }
             // 4. Locate generated APK
             const apkDetails = BuildDetector_1.BuildDetector.findApk(projectRoot, flavor);

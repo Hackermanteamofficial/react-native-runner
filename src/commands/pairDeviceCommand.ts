@@ -21,7 +21,7 @@ export async function pairDeviceCommand(): Promise<void> {
             }
         ],
         {
-            title: 'RN Device Runner: Wireless ADB Setup',
+            title: 'React Native Runner: Wireless ADB Setup',
             placeHolder: 'Select pairing method:'
         }
     );

@@ -1,6 +1,6 @@
 "use strict";
 /**
- * Device models and types for RN Device Runner
+ * Device models and types for React Native Runner
  * Supports both Android and iOS (for future extensibility)
  */
 Object.defineProperty(exports, "__esModule", { value: true });

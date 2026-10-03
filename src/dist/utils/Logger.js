@@ -40,7 +40,7 @@ class Logger {
     outputChannel;
     isDebugEnabled = false;
     constructor() {
-        this.outputChannel = vscode.window.createOutputChannel('RN Device Runner');
+        this.outputChannel = vscode.window.createOutputChannel('React Native Runner');
     }
     static getInstance() {
         if (!Logger.instance) {

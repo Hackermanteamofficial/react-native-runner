@@ -1,15 +1,29 @@
 {
-  "name": "rn-device-runner",
-  "displayName": "RN Device Runner",
+  "name": "react-native-runner",
+  "displayName": "React Native Runner",
   "description": "Native React Native & Expo device runner for Android: zero-polling ADB tracking, content-hash build cache, wireless ADB, and status bar controls.",
-  "version": "2.0.0",
-  "publisher": "rn-device-runner",
+  "version": "2.3.0",
+  "publisher": "react-native-runner",
+  "icon": "media/icon.png",
+  "license": "MIT",
+  "keywords": [
+    "react-native",
+    "expo",
+    "android",
+    "ios",
+    "adb",
+    "emulator",
+    "simulator",
+    "metro",
+    "hermes",
+    "runner"
+  ],
   "engines": {
     "vscode": "^1.80.0"
   },
   "categories": [
-    "Other",
-    "Programming Languages"
+    "Programming Languages",
+    "Other"
   ],
   "activationEvents": [
     "onStartupFinished"
@@ -64,6 +78,66 @@
         "title": "Diagnose",
         "category": "RN",
         "icon": "$(heart)"
+      },
+      {
+        "command": "rn-dev-menu",
+        "title": "Open Dev Menu",
+        "category": "RN",
+        "icon": "$(tools)"
+      },
+      {
+        "command": "rn-logcat",
+        "title": "Stream Logcat",
+        "category": "RN",
+        "icon": "$(output)"
+      },
+      {
+        "command": "rn-deep-link",
+        "title": "Open Deep Link",
+        "category": "RN",
+        "icon": "$(link-external)"
+      },
+      {
+        "command": "rn-metro-clean",
+        "title": "Restart Metro (Clean Cache)",
+        "category": "RN",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "rn-clear-data",
+        "title": "Clear App Data",
+        "category": "RN",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "rn-uninstall",
+        "title": "Uninstall App",
+        "category": "RN",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "rn-screenshot",
+        "title": "Take Screenshot",
+        "category": "RN",
+        "icon": "$(camera)"
+      },
+      {
+        "command": "rn-debug",
+        "title": "Attach Hermes Debugger",
+        "category": "RN",
+        "icon": "$(bug)"
+      },
+      {
+        "command": "rn-select-flavor",
+        "title": "Switch Build Flavor",
+        "category": "RN",
+        "icon": "$(symbol-module)"
+      },
+      {
+        "command": "rn-kill-port",
+        "title": "Free Port / Kill Process",
+        "category": "RN",
+        "icon": "$(flame)"
       }
     ],
     "keybindings": [
@@ -76,10 +150,54 @@
         "command": "rn-select",
         "key": "ctrl+shift+d",
         "mac": "cmd+shift+d"
+      },
+      {
+        "command": "rn-dev-menu",
+        "key": "ctrl+m",
+        "mac": "cmd+m"
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "react-native-runner",
+          "title": "React Native Runner",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "react-native-runner": [
+        {
+          "id": "rn-runner-devices",
+          "name": "Devices & Emulators"
+        },
+        {
+          "id": "rn-runner-actions",
+          "name": "Quick Controls"
+        },
+        {
+          "id": "rn-runner-build",
+          "name": "Build & Cache Status"
+        }
+      ]
+    },
+    "menus": {
+      "view/title": [
+        {
+          "command": "rn-refresh",
+          "when": "view == rn-runner-devices",
+          "group": "navigation"
+        },
+        {
+          "command": "rn-pair",
+          "when": "view == rn-runner-devices",
+          "group": "navigation"
+        }
+      ]
+    },
     "configuration": {
-      "title": "RN Device Runner",
+      "title": "React Native Runner",
       "properties": {
         "rnDeviceRunner.androidSdkPath": {
           "type": "string",

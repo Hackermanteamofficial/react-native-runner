@@ -12,7 +12,7 @@ export async function diagnoseCommand(): Promise<void> {
     logger.clear();
 
     logger.info('=====================================================');
-    logger.info('   RN DEVICE RUNNER: SYSTEM DIAGNOSTIC REPORT        ');
+    logger.info('   REACT NATIVE RUNNER: SYSTEM DIAGNOSTIC REPORT     ');
     logger.info('=====================================================');
 
     // 1. Project Detection
@@ -91,5 +91,5 @@ export async function diagnoseCommand(): Promise<void> {
     logger.info('Diagnostic complete. Check any warnings above.');
     logger.info('=====================================================');
 
-    vscode.window.showInformationMessage('RN Device Runner diagnostic report generated in Output channel.');
+    vscode.window.showInformationMessage('React Native Runner diagnostic report generated in Output channel.');
 }

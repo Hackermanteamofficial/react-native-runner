@@ -1,4 +1,4 @@
-# RN Device Runner (Expo & React Native) — Architecture v2
+# React Native Runner (Expo & React Native) — Architecture v2
 
 An enterprise-grade, independent VS Code extension for React Native and Expo (Android), completely eliminating the need for boilerplate `tasks.json` / `launch.json` and mimicking the seamless workflow of Android Studio right inside VS Code.
 
@@ -8,7 +8,7 @@ An enterprise-grade, independent VS Code extension for React Native and Expo (An
 
 ### 1. Zero-Polling Device Tracking
 * Traditional extensions spawn `adb devices` every 1–2 seconds, causing high CPU churn and race conditions.
-* **RN Device Runner** uses the native ADB daemon socket protocol (`host:track-devices` over port `5037`) for zero-latency, push-based connection and disconnection events with minimal CPU impact.
+* **React Native Runner** uses the native ADB daemon socket protocol (`host:track-devices` over port `5037`) for zero-latency, push-based connection and disconnection events with minimal CPU impact.
 
 ### 2. Content-Hashed Native Build Intelligence
 * Prevents unnecessary 15–30 minute Gradle rebuilds caused by `git checkout` or file touches that alter `mtime`.
@@ -57,12 +57,32 @@ All commands have short, quick-type identifiers in the Command Palette (`Ctrl+Sh
 | `rn-stop` | **RN: Stop** | — | Stop running build, dev server, or emulator |
 | `rn-reload` | **RN: Reload** | — | Trigger fast reload on target device |
 | `rn-select` | **RN: Select Device** | `Ctrl+Shift+D` | Open interactive device & emulator picker |
+| `rn-dev-menu` | **RN: Open Dev Menu** | `Ctrl+M` | Open in-app React Native Developer Menu (keyevent 82) |
+| `rn-logcat` | **RN: Stream Logcat** | — | Stream real-time device logs & catch crashes |
+| `rn-deep-link` | **RN: Open Deep Link** | — | Test custom URI schemes and deep link URLs |
+| `rn-metro-clean` | **RN: Restart Metro (Clean Cache)** | — | Purge Metro bundler cache and restart server |
+| `rn-clear-data` | **RN: Clear App Data** | — | Clear application storage & cache via `pm clear` |
+| `rn-uninstall` | **RN: Uninstall App** | — | Uninstall app and invalidate build cache |
+| `rn-screenshot` | **RN: Take Screenshot** | — | Capture device screen to `.screenshots/` folder |
+| `rn-debug` | **RN: Attach Hermes Debugger** | — | Connect VS Code debugger to Hermes VM (CDP) |
+| `rn-select-flavor` | **RN: Switch Build Flavor** | — | Switch between debug, release, and product flavors |
+| `rn-kill-port` | **RN: Free Port / Kill Process** | — | Terminate rogue process locking Metro's port |
 | `rn-refresh` | **RN: Refresh Devices** | — | Rescan ADB devices and installed AVDs |
 | `rn-emulator` | **RN: Start Emulator** | — | Choose and boot an installed Android AVD |
 | `rn-pair` | **RN: Pair Wireless (ADB)** | — | Connect phone via Wi-Fi (Android 11+ or port 5555) |
 | `rn-diagnose` | **RN: Diagnose** | — | Run comprehensive health check and SDK inspection |
 
-*(Note: Original long command names such as `rn-device-runner.run` remain available as aliases.)*
+*(Note: Long command aliases such as `react-native-runner.*` and `rn-device-runner.*` remain available.)*
+
+---
+
+## 🎨 Activity Bar Sidebar Viewlet
+
+React Native Runner provides an Android Studio-like dedicated sidebar icon in the VS Code Activity Bar with three live TreeViews:
+
+* **📱 Devices & Emulators**: Real-time connected physical hardware, active emulators, and stopped AVDs with 1-click selection, boot, and wireless pairing.
+* **⚡ Quick Controls**: One-click actions for Run, Reload, Dev Menu, Screenshot, Logcat, Deep Links, and Metro Cache Purge.
+* **📦 Build & Cache Status**: Live architecture indicator (Expo vs Bare), SHA-256 content hash, file watcher state, and clean rebuild triggers.
 
 ---
 
@@ -84,7 +104,7 @@ All commands have short, quick-type identifiers in the Command Palette (`Ctrl+Sh
 
 ## 🔍 System Diagnostics
 
-Run `RN Device Runner: Run Diagnostics` from the Command Palette (`Ctrl+Shift+P`) to inspect:
+Run `React Native Runner: Run Diagnostics` from the Command Palette (`Ctrl+Shift+P`) to inspect:
 * Android SDK paths and conflict detection between environment variables and `local.properties`.
 * ADB tool accessibility and version.
 * Connected physical devices and emulators.

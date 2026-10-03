@@ -1,0 +1,8 @@
+**/*.ts
+**/*.js.map
+tsconfig.json
+DESCRIPTION/**
+.screenshots/**
+.vscode/**
+node_modules/**
+*.vsix

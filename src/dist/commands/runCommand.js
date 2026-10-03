@@ -42,8 +42,11 @@ const BootWaiter_1 = require("../devices/BootWaiter");
 const BuildManager_1 = require("../build/BuildManager");
 const MetroManager_1 = require("../metro/MetroManager");
 const ExpoManager_1 = require("../expo/ExpoManager");
+const ExpoCngManager_1 = require("../expo/ExpoCngManager");
 const RunStateMachine_1 = require("../state/RunStateMachine");
 const ConfigurationManager_1 = require("../config/ConfigurationManager");
+const IosSimctlManager_1 = require("../devices/ios/IosSimctlManager");
+const LogcatStreamer_1 = require("../logging/LogcatStreamer");
 const Logger_1 = require("../utils/Logger");
 async function runCommand() {
     const logger = Logger_1.Logger.getInstance();
@@ -60,8 +63,14 @@ async function runCommand() {
         stateMachine.transition({ type: 'START_RUN' });
         const project = await ProjectDetector_1.ProjectDetector.getInstance().detect();
         if (!project) {
-            vscode.window.showErrorMessage('RN Device Runner: No valid React Native or Expo project found.');
+            vscode.window.showErrorMessage('React Native Runner: No valid React Native or Expo project found.');
             stateMachine.transition({ type: 'FAIL', error: 'No project found' });
+            return;
+        }
+        // Check Expo CNG Prebuild requirement
+        const cngCheck = await ExpoCngManager_1.ExpoCngManager.getInstance().checkAndPromptPrebuild(project);
+        if (cngCheck === 'cancelled') {
+            stateMachine.transition({ type: 'STOP' });
             return;
         }
         // 2. Resolve target device
@@ -80,7 +89,29 @@ async function runCommand() {
             cancellable: true
         }, async (progress, token) => {
             let targetSerial = device.serial;
-            // 3. If target is an offline emulator, start it and wait for boot
+            // 3. Handle iOS Simulator if platform is iOS
+            if (device.platform === 'ios') {
+                if (device.state === 'offline' && device.simulatorId) {
+                    progress.report({ message: `Booting iOS Simulator ${device.name}...` });
+                    await IosSimctlManager_1.IosSimctlManager.getInstance().bootSimulator(device.simulatorId);
+                    device.state = 'online';
+                }
+                const pods = IosSimctlManager_1.IosSimctlManager.getInstance().checkCocoaPods(project.rootPath);
+                if (pods.needsPodInstall) {
+                    vscode.window.showWarningMessage(pods.message);
+                }
+                if (config.autoStartMetro) {
+                    progress.report({ message: 'Checking Metro bundler...' });
+                    await metroManager.ensureMetroRunning(project, config.metroPort);
+                }
+                if (project.appScheme && device.simulatorId) {
+                    await IosSimctlManager_1.IosSimctlManager.getInstance().openUrl(device.simulatorId, `${project.appScheme}://`);
+                }
+                stateMachine.transition({ type: 'APP_LAUNCHED' });
+                vscode.window.showInformationMessage(`React Native Runner: App running on ${device.name}!`);
+                return;
+            }
+            // 4. If target is an offline emulator, start it and wait for boot
             if (device.isEmulator && (device.state === 'offline' || !targetSerial)) {
                 stateMachine.transition({ type: 'SELECT_DEVICE', device: device });
                 progress.report({ message: `Starting emulator ${device.name}...` });
@@ -159,13 +190,17 @@ async function runCommand() {
             progress.report({ message: 'Launching app on device...' });
             await expoManager.launchApp(project, targetSerial, adbManager, config.metroPort);
             stateMachine.transition({ type: 'APP_LAUNCHED' });
-            vscode.window.showInformationMessage(`RN Device Runner: App launched on ${device.name}!`);
+            vscode.window.showInformationMessage(`React Native Runner: App launched on ${device.name}!`);
+            // Automatically stream app Logcat
+            LogcatStreamer_1.LogcatStreamer.getInstance().start(targetSerial, device.name, project.packageName).catch(err => {
+                logger.warn(`Failed to auto-start Logcat: ${err}`);
+            });
         });
     }
     catch (err) {
         logger.error(`Run pipeline encountered an error: ${err.message}`);
         stateMachine.transition({ type: 'FAIL', error: err.message });
-        vscode.window.showErrorMessage(`RN Device Runner: ${err.message}`);
+        vscode.window.showErrorMessage(`React Native Runner: ${err.message}`);
     }
 }
 //# sourceMappingURL=runCommand.js.map

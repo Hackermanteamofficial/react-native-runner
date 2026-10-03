@@ -60,7 +60,13 @@ class DeviceQuickPick {
                 if (d.apiLevel) {
                     detail += ` | API ${d.apiLevel}`;
                 }
-                if (d.connection) {
+                if (d.batteryLevel !== undefined) {
+                    detail += ` | 🔋 ${d.batteryLevel}%`;
+                }
+                if (d.networkAddress) {
+                    detail += ` | 📶 ${d.networkAddress}`;
+                }
+                else if (d.connection) {
                     detail += ` | ${d.connection.toUpperCase()}`;
                 }
                 items.push({
@@ -94,6 +100,51 @@ class DeviceQuickPick {
             kind: vscode.QuickPickItemKind.Separator
         });
         items.push({
+            label: '$(tools) Open React Native Dev Menu',
+            description: 'Trigger in-app dev menu (keyevent 82)',
+            action: 'dev-menu'
+        });
+        items.push({
+            label: '$(bug) Attach Hermes Debugger',
+            description: 'Attach VS Code debugger to Hermes VM (Breakpoints & Inspection)',
+            action: 'debug'
+        });
+        items.push({
+            label: '$(camera) Take Screenshot',
+            description: 'Capture device screen to .screenshots/ folder',
+            action: 'screenshot'
+        });
+        items.push({
+            label: '$(output) Stream Device Logcat',
+            description: 'Inspect live app logs & crash dumps',
+            action: 'logcat'
+        });
+        items.push({
+            label: '$(link-external) Open Deep Link...',
+            description: 'Test custom URI scheme or universal URL',
+            action: 'deep-link'
+        });
+        items.push({
+            label: '$(symbol-module) Switch Build Flavor...',
+            description: 'Switch between debug, release, and product flavors',
+            action: 'select-flavor'
+        });
+        items.push({
+            label: '$(clear-all) Restart Metro (Clean Cache)',
+            description: 'Purge Metro cache and restart dev server',
+            action: 'clean-metro'
+        });
+        items.push({
+            label: '$(flame) Free Port / Kill Process...',
+            description: 'Inspect and terminate processes blocking Metro ports',
+            action: 'kill-port'
+        });
+        items.push({
+            label: '$(trash) Clear App Data & Cache',
+            description: 'Reset local app sandbox via pm clear',
+            action: 'clear-data'
+        });
+        items.push({
             label: '$(radio-tower) Pair Wireless Device (ADB)...',
             description: 'Connect phone via Wi-Fi (Redmi Note, etc.)',
             action: 'pair'
@@ -109,14 +160,41 @@ class DeviceQuickPick {
             action: 'refresh'
         });
         const picked = await vscode.window.showQuickPick(items, {
-            placeHolder: 'Select target device or emulator...',
-            title: 'RN Device Runner: Devices'
+            placeHolder: 'Select target device or quick action...',
+            title: 'React Native Runner: Devices & Actions'
         });
         if (!picked) {
             return undefined;
         }
         if (picked.action) {
             switch (picked.action) {
+                case 'dev-menu':
+                    await vscode.commands.executeCommand('rn-dev-menu');
+                    return undefined;
+                case 'debug':
+                    await vscode.commands.executeCommand('rn-debug');
+                    return undefined;
+                case 'screenshot':
+                    await vscode.commands.executeCommand('rn-screenshot');
+                    return undefined;
+                case 'logcat':
+                    await vscode.commands.executeCommand('rn-logcat');
+                    return undefined;
+                case 'deep-link':
+                    await vscode.commands.executeCommand('rn-deep-link');
+                    return undefined;
+                case 'select-flavor':
+                    await vscode.commands.executeCommand('rn-select-flavor');
+                    return undefined;
+                case 'clean-metro':
+                    await vscode.commands.executeCommand('rn-metro-clean');
+                    return undefined;
+                case 'kill-port':
+                    await vscode.commands.executeCommand('rn-kill-port');
+                    return undefined;
+                case 'clear-data':
+                    await vscode.commands.executeCommand('rn-clear-data');
+                    return undefined;
                 case 'refresh':
                     await vscode.commands.executeCommand('rn-refresh');
                     return undefined;

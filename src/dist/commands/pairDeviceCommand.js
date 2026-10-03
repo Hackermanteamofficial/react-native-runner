@@ -53,7 +53,7 @@ async function pairDeviceCommand() {
             mode: 'connect'
         }
     ], {
-        title: 'RN Device Runner: Wireless ADB Setup',
+        title: 'React Native Runner: Wireless ADB Setup',
         placeHolder: 'Select pairing method:'
     });
     if (!action) {

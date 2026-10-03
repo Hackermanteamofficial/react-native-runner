@@ -9,6 +9,7 @@ import { ProcessRunner } from '../utils/ProcessRunner';
 import { ConfigurationManager } from '../config/ConfigurationManager';
 import { AdbManager } from '../devices/AdbManager';
 import { BuildOptions, BuildResult } from '../types/Build';
+import { GradleErrorDiagnoser } from './diagnostics/GradleErrorDiagnoser';
 import { Logger } from '../utils/Logger';
 
 export class BuildManager {
@@ -120,7 +121,24 @@ export class BuildManager {
             );
 
             if (result.exitCode !== 0) {
-                throw new Error(`Gradle build failed with exit code ${result.exitCode}. See output log for details.`);
+                const combinedOutput = `${result.stdout}\n${result.stderr}`;
+                const diagnosis = GradleErrorDiagnoser.diagnose(combinedOutput);
+                this.logger.error(`\n[DIAGNOSTIC REPORT] ${diagnosis.title}\n${diagnosis.details}`);
+
+                vscode.window.showErrorMessage(
+                    `Build Failed: ${diagnosis.title}`,
+                    diagnosis.actionLabel || 'Show Output'
+                ).then(selection => {
+                    if (selection === diagnosis.actionLabel && diagnosis.actionDocUrl) {
+                        vscode.env.openExternal(vscode.Uri.parse(diagnosis.actionDocUrl));
+                    } else if (selection === 'Open Run Diagnostics') {
+                        vscode.commands.executeCommand('rn-diagnose');
+                    } else {
+                        this.logger.show(true);
+                    }
+                });
+
+                throw new Error(`${diagnosis.title}: ${diagnosis.details}`);
             }
 
             // 4. Locate generated APK

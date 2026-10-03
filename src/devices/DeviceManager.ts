@@ -8,6 +8,7 @@ import { WirelessPairing } from './WirelessPairing';
 import { DeviceStateStore } from './DeviceState';
 import { DeviceParser } from './DeviceParser';
 import { AndroidSdkDetector } from '../utils/AndroidSdkDetector';
+import { IosSimctlManager } from './ios/IosSimctlManager';
 import { ConfigurationManager } from '../config/ConfigurationManager';
 import { Logger } from '../utils/Logger';
 
@@ -129,6 +130,12 @@ export class DeviceManager extends EventEmitter {
                     if (apiLevel) {
                         device.apiLevel = apiLevel;
                     }
+                    if (device.isPhysical) {
+                        const battery = await this.adbManager.getBatteryLevel(device.id);
+                        if (battery !== undefined) {
+                            device.batteryLevel = battery;
+                        }
+                    }
                 }
 
                 unified.push(device);
@@ -148,6 +155,12 @@ export class DeviceManager extends EventEmitter {
                         avdName: avd.name
                     });
                 }
+            }
+
+            // Process iOS Simulators (if running on macOS)
+            if (IosSimctlManager.getInstance().isSupported()) {
+                const iosSims = await IosSimctlManager.getInstance().getSimulators();
+                unified.push(...iosSims);
             }
 
             this.devices = unified;

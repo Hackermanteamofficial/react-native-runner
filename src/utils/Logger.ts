@@ -8,7 +8,7 @@ export class Logger {
     private isDebugEnabled: boolean = false;
 
     private constructor() {
-        this.outputChannel = vscode.window.createOutputChannel('RN Device Runner');
+        this.outputChannel = vscode.window.createOutputChannel('React Native Runner');
     }
 
     public static getInstance(): Logger {

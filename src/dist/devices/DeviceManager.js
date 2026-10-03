@@ -10,6 +10,7 @@ const WirelessPairing_1 = require("./WirelessPairing");
 const DeviceState_1 = require("./DeviceState");
 const DeviceParser_1 = require("./DeviceParser");
 const AndroidSdkDetector_1 = require("../utils/AndroidSdkDetector");
+const IosSimctlManager_1 = require("./ios/IosSimctlManager");
 const ConfigurationManager_1 = require("../config/ConfigurationManager");
 const Logger_1 = require("../utils/Logger");
 class DeviceManager extends events_1.EventEmitter {
@@ -107,6 +108,12 @@ class DeviceManager extends events_1.EventEmitter {
                     if (apiLevel) {
                         device.apiLevel = apiLevel;
                     }
+                    if (device.isPhysical) {
+                        const battery = await this.adbManager.getBatteryLevel(device.id);
+                        if (battery !== undefined) {
+                            device.batteryLevel = battery;
+                        }
+                    }
                 }
                 unified.push(device);
             }
@@ -124,6 +131,11 @@ class DeviceManager extends events_1.EventEmitter {
                         avdName: avd.name
                     });
                 }
+            }
+            // Process iOS Simulators (if running on macOS)
+            if (IosSimctlManager_1.IosSimctlManager.getInstance().isSupported()) {
+                const iosSims = await IosSimctlManager_1.IosSimctlManager.getInstance().getSimulators();
+                unified.push(...iosSims);
             }
             this.devices = unified;
             this.logger.debug(`Unified device list updated: ${unified.length} devices found (${runningAvdNames.size} running emulators, ${this.installedAvds.length} total AVDs).`);

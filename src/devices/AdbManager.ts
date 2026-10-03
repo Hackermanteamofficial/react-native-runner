@@ -98,6 +98,35 @@ export class AdbManager {
         await this.shell(serial, 'input text "RR"');
     }
 
+    public async clearAppData(serial: string, packageName: string): Promise<void> {
+        this.logger.info(`Clearing app data for ${packageName} on ${serial}...`);
+        await this.shell(serial, `pm clear ${packageName}`);
+    }
+
+    public async uninstallApp(serial: string, packageName: string): Promise<void> {
+        this.logger.info(`Uninstalling ${packageName} from ${serial}...`);
+        await this.execute(['-s', serial, 'uninstall', packageName]);
+    }
+
+    public async getPid(serial: string, packageName: string): Promise<number | undefined> {
+        try {
+            const out = await this.shell(serial, `pidof -s ${packageName}`, 3000);
+            const pid = parseInt(out.trim(), 10);
+            return isNaN(pid) ? undefined : pid;
+        } catch {
+            return undefined;
+        }
+    }
+
+    public async takeScreenshot(serial: string, localFilePath: string): Promise<void> {
+        const remoteTemp = '/sdcard/rnr_temp_screenshot.png';
+        this.logger.info(`Capturing device screenshot on ${serial}...`);
+        await this.shell(serial, `screencap -p ${remoteTemp}`);
+        await this.execute(['-s', serial, 'pull', remoteTemp, localFilePath]);
+        await this.shell(serial, `rm ${remoteTemp}`).catch(() => {});
+        this.logger.info(`Screenshot pulled to ${localFilePath}`);
+    }
+
     public async getAvdNameForSerial(serial: string): Promise<string | undefined> {
         if (!serial.startsWith('emulator-')) {
             return undefined;

@@ -53,7 +53,7 @@ async function stopCommand() {
         { label: 'Stop Metro Bundler Terminal', action: 'metro' },
         { label: 'Kill Running Android Emulator', action: 'emulator' },
         { label: 'Reset Runner State', action: 'reset' }
-    ], { title: 'RN Device Runner: Stop / Terminate Options' });
+    ], { title: 'React Native Runner: Stop / Terminate Options' });
     if (!choice) {
         return;
     }

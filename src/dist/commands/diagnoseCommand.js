@@ -46,7 +46,7 @@ async function diagnoseCommand() {
     logger.show();
     logger.clear();
     logger.info('=====================================================');
-    logger.info('   RN DEVICE RUNNER: SYSTEM DIAGNOSTIC REPORT        ');
+    logger.info('   REACT NATIVE RUNNER: SYSTEM DIAGNOSTIC REPORT     ');
     logger.info('=====================================================');
     // 1. Project Detection
     logger.info('\n--- [1] Workspace & Project Info ---');
@@ -120,6 +120,6 @@ async function diagnoseCommand() {
     logger.info('\n=====================================================');
     logger.info('Diagnostic complete. Check any warnings above.');
     logger.info('=====================================================');
-    vscode.window.showInformationMessage('RN Device Runner diagnostic report generated in Output channel.');
+    vscode.window.showInformationMessage('React Native Runner diagnostic report generated in Output channel.');
 }
 //# sourceMappingURL=diagnoseCommand.js.map
