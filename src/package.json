@@ -1,0 +1,147 @@
+{
+  "name": "rn-device-runner",
+  "displayName": "RN Device Runner",
+  "description": "Native React Native & Expo device runner for Android: zero-polling ADB tracking, content-hash build cache, wireless ADB, and status bar controls.",
+  "version": "2.0.0",
+  "publisher": "rn-device-runner",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other",
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "rn-run",
+        "title": "Run",
+        "category": "RN",
+        "icon": "$(play)"
+      },
+      {
+        "command": "rn-stop",
+        "title": "Stop",
+        "category": "RN",
+        "icon": "$(stop)"
+      },
+      {
+        "command": "rn-reload",
+        "title": "Reload",
+        "category": "RN",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "rn-select",
+        "title": "Select Device",
+        "category": "RN",
+        "icon": "$(device-mobile)"
+      },
+      {
+        "command": "rn-refresh",
+        "title": "Refresh Devices",
+        "category": "RN",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "rn-emulator",
+        "title": "Start Emulator",
+        "category": "RN",
+        "icon": "$(vm-active)"
+      },
+      {
+        "command": "rn-pair",
+        "title": "Pair Wireless (ADB)",
+        "category": "RN",
+        "icon": "$(radio-tower)"
+      },
+      {
+        "command": "rn-diagnose",
+        "title": "Diagnose",
+        "category": "RN",
+        "icon": "$(heart)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "rn-run",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r"
+      },
+      {
+        "command": "rn-select",
+        "key": "ctrl+shift+d",
+        "mac": "cmd+shift+d"
+      }
+    ],
+    "configuration": {
+      "title": "RN Device Runner",
+      "properties": {
+        "rnDeviceRunner.androidSdkPath": {
+          "type": "string",
+          "default": "",
+          "description": "Custom path to Android SDK root (overrides ANDROID_HOME and local.properties)."
+        },
+        "rnDeviceRunner.adbPath": {
+          "type": "string",
+          "default": "",
+          "description": "Custom absolute path to adb binary."
+        },
+        "rnDeviceRunner.emulatorPath": {
+          "type": "string",
+          "default": "",
+          "description": "Custom absolute path to emulator binary."
+        },
+        "rnDeviceRunner.metroPort": {
+          "type": "number",
+          "default": 8081,
+          "description": "Port used by Metro bundler dev server."
+        },
+        "rnDeviceRunner.buildFlavor": {
+          "type": "string",
+          "default": "debug",
+          "description": "Gradle build flavor (e.g. debug, release)."
+        },
+        "rnDeviceRunner.autoStartMetro": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically start Metro dev server in VS Code terminal if not already running."
+        },
+        "rnDeviceRunner.warnLowDiskSpace": {
+          "type": "boolean",
+          "default": true,
+          "description": "Warn before starting Gradle build if free disk space is low."
+        },
+        "rnDeviceRunner.diskSpaceThresholdGb": {
+          "type": "number",
+          "default": 5,
+          "description": "Minimum recommended free disk space (in GB) for Android Gradle builds."
+        },
+        "rnDeviceRunner.wirelessAdbDefaultPort": {
+          "type": "number",
+          "default": 5555,
+          "description": "Default port for direct wireless ADB connect."
+        },
+        "rnDeviceRunner.preferredDeviceId": {
+          "type": "string",
+          "default": "",
+          "description": "Serial or AVD name of the preferred target device."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.80.0",
+    "typescript": "^5.3.3"
+  }
+}

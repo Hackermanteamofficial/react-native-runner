@@ -1,0 +1,1 @@
+{"version":3,"file":"selectDeviceCommand.js","sourceRoot":"","sources":["../../../src/commands/selectDeviceCommand.ts"],"names":[],"mappings":";;AAGA,kDAGC;AAND,4DAAyD;AACzD,2DAAwD;AAEjD,KAAK,UAAU,mBAAmB;IACrC,MAAM,aAAa,GAAG,6BAAa,CAAC,WAAW,EAAE,CAAC;IAClD,MAAM,iCAAe,CAAC,IAAI,CAAC,aAAa,CAAC,CAAC;AAC9C,CAAC"}

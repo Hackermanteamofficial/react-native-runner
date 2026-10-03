@@ -1,0 +1,137 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ContentHasher = void 0;
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
+const crypto = __importStar(require("crypto"));
+const Logger_1 = require("../utils/Logger");
+class ContentHasher {
+    static ignoredDirs = new Set([
+        '.gradle',
+        'build',
+        '.cxx',
+        '.idea',
+        'bin',
+        'node_modules',
+        'generated',
+        'intermediates'
+    ]);
+    static ignoredExtensions = new Set([
+        '.keystore',
+        '.jks',
+        '.log',
+        '.tmp',
+        '.hprof'
+    ]);
+    static logger = Logger_1.Logger.getInstance();
+    static async calculateProjectNativeHash(projectRoot) {
+        const hash = crypto.createHash('sha256');
+        let fileCount = 0;
+        // 1. Hash android folder if it exists
+        const androidDir = path.join(projectRoot, 'android');
+        if (fs.existsSync(androidDir)) {
+            const files = this.collectFiles(androidDir);
+            // Sort deterministically
+            files.sort();
+            for (const file of files) {
+                try {
+                    const content = fs.readFileSync(file);
+                    const relPath = path.relative(projectRoot, file).replace(/\\/g, '/');
+                    hash.update(relPath);
+                    hash.update(content);
+                    fileCount++;
+                }
+                catch {
+                    // Ignore unreadable files
+                }
+            }
+        }
+        // 2. Hash key configuration and dependency files
+        const keyFiles = [
+            'package.json',
+            'app.json',
+            'app.config.js',
+            'app.config.ts',
+            'yarn.lock',
+            'package-lock.json',
+            'pnpm-lock.yaml',
+            'bun.lockb'
+        ];
+        for (const kf of keyFiles) {
+            const fullPath = path.join(projectRoot, kf);
+            if (fs.existsSync(fullPath)) {
+                try {
+                    const content = fs.readFileSync(fullPath);
+                    hash.update(kf);
+                    hash.update(content);
+                    fileCount++;
+                }
+                catch {
+                    // Ignore
+                }
+            }
+        }
+        const digest = hash.digest('hex');
+        this.logger.debug(`Calculated native content hash: ${digest.substring(0, 12)}... across ${fileCount} files.`);
+        return { hash: digest, fileCount };
+    }
+    static collectFiles(dir) {
+        const results = [];
+        try {
+            const entries = fs.readdirSync(dir, { withFileTypes: true });
+            for (const entry of entries) {
+                const fullPath = path.join(dir, entry.name);
+                if (entry.isDirectory()) {
+                    if (!this.ignoredDirs.has(entry.name)) {
+                        results.push(...this.collectFiles(fullPath));
+                    }
+                }
+                else if (entry.isFile()) {
+                    const ext = path.extname(entry.name).toLowerCase();
+                    if (!this.ignoredExtensions.has(ext)) {
+                        results.push(fullPath);
+                    }
+                }
+            }
+        }
+        catch {
+            // Ignore directory read errors
+        }
+        return results;
+    }
+}
+exports.ContentHasher = ContentHasher;
+//# sourceMappingURL=ContentHasher.js.map
